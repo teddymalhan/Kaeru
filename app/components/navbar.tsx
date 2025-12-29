@@ -13,13 +13,11 @@ import {
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useState } from "react"
-import { useAuthenticator } from "@aws-amplify/ui-react"
 import { ThemeToggle } from "./theme-toggle"
 import { cn } from "@/lib/utils"
 
 export function Navbar() {
   const pathname = usePathname()
-  const { user, signOut } = useAuthenticator((context) => [context.user, context.signOut])
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const navLinks = [
@@ -99,16 +97,12 @@ export function Navbar() {
                   Signed in as
                 </DropdownMenuLabel>
                 <div className="rounded-xl bg-muted/40 px-3 py-2 text-sm font-medium text-foreground/90">
-                  {user?.signInDetails?.loginId || user?.username || "Guest"}
+                  Demo User
                 </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
                   <User className="mr-2 h-4 w-4" />
                   Profile
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive" onClick={() => signOut()}>
-                  Log out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
