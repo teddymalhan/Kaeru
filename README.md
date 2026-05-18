@@ -14,15 +14,10 @@ The name comes from 帰る (kaeru) — Japanese for "to return, go back, or rest
 
 Kaeru combines Next.js 14 (App Router), AWS Amplify Gen2, Plaid, VAPI voice agents, and LangChain-powered GPT-4 fraud detection into a single dashboard for managing subscriptions, disputing fraudulent charges, and automating customer outreach by phone and email.
 
-## Architecture
-
-<p align="center">
-<img src="docs/architecture.png" alt="Kaeru high-level architecture" width="900">
-</p>
-
 ## Table of Contents
 
 - [Background](#background)
+- [Architecture](#architecture)
 - [Install](#install)
 - [Usage](#usage)
 - [Features](#features)
@@ -37,11 +32,36 @@ Kaeru combines Next.js 14 (App Router), AWS Amplify Gen2, Plaid, VAPI voice agen
 Cancelling subscriptions, disputing fraudulent transactions, and chasing refunds are time-consuming, repetitive tasks that financial institutions have historically pushed onto consumers. Kaeru automates this work using a combination of:
 
 - **Plaid** for transaction aggregation and account linking.
-- **LangChain + OpenAI GPT-4** for fraud detection and behavioral analysis.
+- **LangChain** for fraud detection and behavioral analysis.
 - **VAPI** voice agents ("Riley") for placing cancellation and dispute phone calls.
 - **AWS Step Functions** for orchestrating multi-step cancellation and dispute workflows.
 
 See Also: [Plaid](https://plaid.com), [AWS Amplify Gen2](https://docs.amplify.aws/), [LangChain](https://js.langchain.com/), [VAPI](https://vapi.ai/).
+
+## Architecture
+
+<p align="center">
+<img src="docs/architecture.png" alt="Kaeru high-level architecture" width="900">
+</p>
+
+A typical end-to-end Kaeru session, step by step:
+
+1. **Sign in.** User opens the Kaeru dashboard at `/` and authenticates.
+2. **Link a bank account.** User connects their financial institution through Plaid Link.
+3. **Ingest transactions.** Plaid sends a webhook to the `ingestTransactions` Lambda, which writes transactions to the Amplify data layer.
+4. **Analyze for fraud.** `FraudDetectionAgent` (LangChain + GPT-4) scores each transaction and assigns a risk level: LOW (0–30), MEDIUM (30–50), or HIGH (50+).
+5. **Surface alerts.** MEDIUM and HIGH risk transactions appear on the dashboard as fraud alerts; LOW risk transactions land in the standard transaction history.
+6. **User reviews the alert.** The user opens a flagged transaction and chooses one of three paths:
+   - **Legitimate** — dismiss the alert; the transaction stays in history.
+   - **Cancel a subscription** — go to step 7.
+   - **Dispute a charge** — go to step 8.
+7. **Cancellation workflow.** A Step Functions workflow picks the best channel:
+   - `cancelApi` — programmatic API cancellation when supported.
+   - `cancelEmail` — sends a cancellation email.
+   - `cancelViaVapi` — Riley (VAPI voice agent) places a phone call to the provider.
+8. **Dispute workflow.** A Step Functions workflow runs `disputeViaVapi`, where Riley calls the issuer and files the dispute on the user's behalf.
+9. **Stream status.** Workflow progress (queued → in-progress → completed/failed) streams back to the dashboard via the agent status API.
+10. **Resolution.** The user sees the final outcome — cancelled subscription, filed dispute, or refunded charge — and an updated transaction list.
 
 ## Install
 
