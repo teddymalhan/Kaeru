@@ -1,4 +1,4 @@
-# Kaeru _(aws-amplify-gen2)_
+# Kaeru
 
 <p align="center">
 <img width="128" height="128" src="public/kaeru-icon.svg" alt="Kaeru icon">
@@ -13,6 +13,12 @@ An AI-powered financial operations platform that automates cancellations, disput
 The name comes from 帰る (kaeru) — Japanese for "to return, go back, or restore" — reflecting the project's goal of helping users reclaim control over their financial life. Note: the npm package name in `package.json` is `aws-amplify-gen2` for historical reasons tied to the underlying AWS Amplify Gen2 scaffold; the repository, product, and folder name is `kaeru`.
 
 Kaeru combines Next.js 14 (App Router), AWS Amplify Gen2, Plaid, VAPI voice agents, and LangChain-powered GPT-4 fraud detection into a single dashboard for managing subscriptions, disputing fraudulent charges, and automating customer outreach by phone and email.
+
+## Architecture
+
+<p align="center">
+<img src="docs/architecture.png" alt="Kaeru high-level architecture" width="900">
+</p>
 
 ## Table of Contents
 
